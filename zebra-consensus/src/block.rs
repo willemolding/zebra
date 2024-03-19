@@ -137,6 +137,7 @@ where
     }
 
     fn call(&mut self, request: Request) -> Self::Future {
+        
         let mut state_service = self.state_service.clone();
         let mut transaction_verifier = self.transaction_verifier.clone();
         let network = self.network;
@@ -179,13 +180,19 @@ where
             // > The block data MUST be validated and checked against the server's usual
             // > acceptance rules (excluding the check for a valid proof-of-work).
             // <https://en.bitcoin.it/wiki/BIP_0023#Block_Proposal>
-            if request.is_proposal() {
-                check::difficulty_threshold_is_valid(&block.header, network, &height, &hash)?;
-            } else {
-                // Do the difficulty checks first, to raise the threshold for
-                // attacks that use any other fields.
-                check::difficulty_is_valid(&block.header, network, &height, &hash)?;
-                check::equihash_solution_is_valid(&block.header)?;
+            match request {
+                Request::Commit(_) => {
+                    check::difficulty_threshold_is_valid(&block.header, network, &height, &hash)?;
+                }
+                Request::CheckProposal(_) => {
+                    // Do the difficulty checks first, to raise the threshold for
+                    // attacks that use any other fields.
+                    check::difficulty_is_valid(&block.header, network, &height, &hash)?;
+                    check::equihash_solution_is_valid(&block.header)?;
+                }
+                Request::TinyCash(_) => {
+                    // TinyCash requests skip checking proof of work
+                }
             }
 
             // Next, check the Merkle root validity, to ensure that
@@ -201,11 +208,16 @@ where
             // quick checks first.
 
             // Quick field validity and structure checks
-            let now = Utc::now();
-            check::time_is_valid_at(&block.header, now, &height, &hash)
-                .map_err(VerifyBlockError::Time)?;
+
+            // don't care about block times or subsidies for tinycash
+            if !request.is_tinycash() {
+                let now = Utc::now();
+                check::time_is_valid_at(&block.header, now, &height, &hash)
+                    .map_err(VerifyBlockError::Time)?;
+                check::subsidy_is_valid(&block, network)?;
+
+            }
             let coinbase_tx = check::coinbase_is_first(&block)?;
-            check::subsidy_is_valid(&block, network)?;
 
             // Now do the slower checks
 

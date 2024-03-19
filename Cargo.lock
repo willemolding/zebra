@@ -5759,6 +5759,7 @@ dependencies = [
  "tinyvec",
  "tokio",
  "tracing",
+ "tracing-test",
  "uint",
  "x25519-dalek",
  "zcash_address",

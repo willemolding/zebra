@@ -58,6 +58,7 @@ impl From<Network> for zcash_address::Network {
         match network {
             Network::Mainnet => zcash_address::Network::Main,
             Network::Testnet => zcash_address::Network::Test,
+            Network::TinyCash => zcash_address::Network::Main,
         }
     }
 }

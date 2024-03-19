@@ -252,7 +252,7 @@ pub struct Verifier {
 }
 
 impl Verifier {
-    fn new(vk: &'static ItemVerifyingKey) -> Self {
+    pub fn new(vk: &'static ItemVerifyingKey) -> Self {
         let batch = BatchVerifier::default();
         let (tx, _) = watch::channel(None);
         Self { batch, vk, tx }
@@ -300,7 +300,7 @@ impl Verifier {
     }
 
     /// Verify a single item using a thread pool, and return the result.
-    async fn verify_single_spawning(
+    pub async fn verify_single_spawning(
         item: Item,
         pvk: &'static ItemVerifyingKey,
     ) -> Result<(), BoxError> {

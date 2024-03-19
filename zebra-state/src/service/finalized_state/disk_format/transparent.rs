@@ -506,6 +506,8 @@ fn address_variant(address: &transparent::Address) -> u8 {
         (Mainnet, PayToScriptHash { .. }) => 1,
         (Testnet, PayToPublicKeyHash { .. }) => 2,
         (Testnet, PayToScriptHash { .. }) => 3,
+        (TinyCash, PayToPublicKeyHash { .. }) => 0,
+        (TinyCash, PayToScriptHash { .. }) => 1,
     }
 }
 

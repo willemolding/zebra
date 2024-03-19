@@ -210,7 +210,7 @@ pub(crate) fn write_coinbase_height<W: io::Write>(
         if coinbase_data.0 != GENESIS_COINBASE_DATA {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
-                "invalid genesis coinbase data",
+                format!("invalid genesis coinbase data: {:?}", coinbase_data.0),
             ));
         }
     } else if let h @ 1..=16 = height.0 {

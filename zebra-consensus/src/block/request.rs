@@ -15,6 +15,11 @@ pub enum Request {
     /// then asks the state to perform contextual validation.
     /// Does not commit the block to the state.
     CheckProposal(Arc<Block>),
+
+    /// Performs partial semantic validation but skips:
+    ///     - checking proof of work
+    /// It then asks the state to do contextual validation and commits the block
+    TinyCash(Arc<Block>),
 }
 
 impl Request {
@@ -25,6 +30,7 @@ impl Request {
 
             #[cfg(feature = "getblocktemplate-rpcs")]
             Request::CheckProposal(block) => block,
+            Request::TinyCash(block) => block,
         })
     }
 
@@ -35,6 +41,15 @@ impl Request {
 
             #[cfg(feature = "getblocktemplate-rpcs")]
             Request::CheckProposal(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns `true` if the request is a tinycash request
+    pub fn is_tinycash(&self) -> bool {
+        match self {
+            Request::TinyCash(_) => true,
+            _ => false,
         }
     }
 }

@@ -61,6 +61,9 @@ pub enum Network {
 
     /// The oldest public test network.
     Testnet,
+
+    /// Special network for rollups
+    TinyCash,
 }
 
 use zcash_primitives::consensus::{Network as ZcashPrimitivesNetwork, Parameters as _};
@@ -88,6 +91,7 @@ impl Network {
         match self {
             Network::Mainnet => true,
             Network::Testnet => height >= super::TESTNET_MAX_TIME_START_HEIGHT,
+            Network::TinyCash => false,
         }
     }
 }
@@ -97,6 +101,7 @@ impl From<Network> for &'static str {
         match network {
             Network::Mainnet => "Mainnet",
             Network::Testnet => "Testnet",
+            Network::TinyCash => "TinyCash",
         }
     }
 }
@@ -125,6 +130,7 @@ impl Network {
         match self {
             Network::Mainnet => 8233,
             Network::Testnet => 18233,
+            Network::TinyCash => 8233,
         }
     }
 
@@ -138,12 +144,14 @@ impl Network {
         //
         // See the `ZIP_212_GRACE_PERIOD_DURATION` documentation for more information.
 
-        let canopy_activation = Canopy
-            .activation_height(*self)
-            .expect("Canopy activation height must be present for both networks");
+        Height(0)
 
-        (canopy_activation + ZIP_212_GRACE_PERIOD_DURATION)
-            .expect("ZIP-212 grace period ends at a valid block height")
+        // let canopy_activation = Canopy
+        //     .activation_height(*self)
+        //     .expect("Canopy activation height must be present for both networks");
+
+        // (canopy_activation + ZIP_212_GRACE_PERIOD_DURATION)
+        //     .expect("ZIP-212 grace period ends at a valid block height")
     }
 
     /// Return the network name as defined in
@@ -152,6 +160,7 @@ impl Network {
         match self {
             Network::Mainnet => "main".to_string(),
             Network::Testnet => "test".to_string(),
+            Network::TinyCash => "tinycash".to_string(),
         }
     }
 

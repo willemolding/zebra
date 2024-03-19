@@ -126,6 +126,21 @@ const FAKE_TESTNET_ACTIVATION_HEIGHTS: &[(block::Height, NetworkUpgrade)] = &[
     (block::Height(35), Nu5),
 ];
 
+/// TinyCash network upgrade activation heights.
+///
+/// Tiny cash gets all the network upgrades right from the start
+#[allow(unused)]
+pub(super) const TINYCASH_ACTIVATION_HEIGHTS: &[(block::Height, NetworkUpgrade)] = &[
+    (block::Height(0), Genesis),
+    (block::Height(1), BeforeOverwinter),
+    (block::Height(1), Overwinter),
+    (block::Height(1), Sapling),
+    (block::Height(1), Blossom),
+    (block::Height(1), Heartwood),
+    (block::Height(1), Canopy),
+    (block::Height(1), Nu5),
+];
+
 /// The Consensus Branch Id, used to bind transactions and blocks to a
 /// particular network upgrade.
 #[derive(Copy, Clone, Debug, Default, Eq, Hash, PartialEq, Serialize, Deserialize)]
@@ -242,10 +257,10 @@ impl Network {
     /// and it's a test build, this returns a list of fake activation heights
     /// used by some tests.
     pub fn activation_list(&self) -> BTreeMap<block::Height, NetworkUpgrade> {
-        let (mainnet_heights, testnet_heights) = {
+        let (mainnet_heights, testnet_heights, tinycash_heights) = {
             #[cfg(not(feature = "zebra-test"))]
             {
-                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS)
+                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS, TINYCASH_ACTIVATION_HEIGHTS)
             }
 
             // To prevent accidentally setting this somehow, only check the env var
@@ -264,14 +279,16 @@ impl Network {
                 (
                     FAKE_MAINNET_ACTIVATION_HEIGHTS,
                     FAKE_TESTNET_ACTIVATION_HEIGHTS,
+                    TINYCASH_ACTIVATION_HEIGHTS,
                 )
             } else {
-                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS)
+                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS, TINYCASH_ACTIVATION_HEIGHTS)
             }
         };
         match self {
             Mainnet => mainnet_heights,
             Testnet => testnet_heights,
+            TinyCash => tinycash_heights,
         }
         .iter()
         .cloned()
@@ -306,6 +323,9 @@ impl NetworkUpgrade {
     /// Returns None if this network upgrade is a future upgrade, and its
     /// activation height has not been set yet.
     pub fn activation_height(&self, network: Network) -> Option<block::Height> {
+        if network == Network::TinyCash {
+            return Some(block::Height(1)); // everything is activated from the start
+        }
         network
             .activation_list()
             .iter()
@@ -394,6 +414,7 @@ impl NetworkUpgrade {
         match (network, height) {
             (Network::Testnet, height) if height < TESTNET_MINIMUM_DIFFICULTY_START_HEIGHT => None,
             (Network::Mainnet, _) => None,
+            (Network::TinyCash, _) => None,
             (Network::Testnet, _) => {
                 let network_upgrade = NetworkUpgrade::current(network, height);
                 Some(network_upgrade.target_spacing() * TESTNET_MINIMUM_DIFFICULTY_GAP_MULTIPLIER)

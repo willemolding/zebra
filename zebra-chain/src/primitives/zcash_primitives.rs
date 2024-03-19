@@ -342,6 +342,7 @@ impl From<Network> for zcash_primitives::consensus::Network {
         match network {
             Network::Mainnet => zcash_primitives::consensus::Network::MainNetwork,
             Network::Testnet => zcash_primitives::consensus::Network::TestNetwork,
+            Network::TinyCash => unimplemented!("TinyCash is not supported by zcash_primitives"),
         }
     }
 }
