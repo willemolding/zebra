@@ -80,6 +80,12 @@ where
         .expect("valid blocks have a coinbase height");
     check::height_one_more_than_parent_height(parent_height, semantically_verified.height)?;
 
+
+    if network == Network::TinyCash {
+        // TinyCash has no difficulty adjustment, so we can skip the rest of the checks
+        return Ok(());
+    }
+
     if relevant_chain.len() < POW_ADJUSTMENT_BLOCK_SPAN {
         // skip this check during tests if we don't have enough blocks in the chain
         // process_queued also checks the chain length, so we can skip this assertion during testing
@@ -124,6 +130,12 @@ pub(crate) fn block_commitment_is_valid_for_chain_history(
     network: Network,
     history_tree: &HistoryTree,
 ) -> Result<(), ValidateContextError> {
+
+    if network == Network::TinyCash {
+        // TinyCash has no chain history, so we can skip the rest of the checks
+        return Ok(());
+    }
+
     match block.commitment(network)? {
         block::Commitment::PreSaplingReserved(_)
         | block::Commitment::FinalSaplingRoot(_)

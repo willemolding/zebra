@@ -582,6 +582,7 @@ impl NonFinalizedState {
     /// The chain can be an existing chain in the non-finalized state, or a freshly
     /// created fork.
     fn parent_chain(&self, parent_hash: block::Hash) -> Result<Arc<Chain>, ValidateContextError> {
+
         match self.find_chain(|chain| chain.non_finalized_tip_hash() == parent_hash) {
             // Clone the existing Arc<Chain> in the non-finalized state
             Some(chain) => Ok(chain.clone()),

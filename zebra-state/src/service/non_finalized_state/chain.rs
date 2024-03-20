@@ -1473,13 +1473,15 @@ impl Chain {
             "block heights must be unique within a single chain"
         );
 
-        // add work to partial cumulative work
-        let block_work = block
-            .header
-            .difficulty_threshold
-            .to_work()
-            .expect("work has already been validated");
-        self.partial_cumulative_work += block_work;
+        if self.network != Network::TinyCash {
+            // add work to partial cumulative work
+            let block_work = block
+                .header
+                .difficulty_threshold
+                .to_work()
+                .expect("work has already been validated");
+            self.partial_cumulative_work += block_work;
+        }
 
         // for each transaction in block
         for (transaction_index, (transaction, transaction_hash)) in block
