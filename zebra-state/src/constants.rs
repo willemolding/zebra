@@ -28,7 +28,7 @@ pub use zebra_chain::transparent::MIN_TRANSPARENT_COINBASE_MATURITY;
 /// will be finalized. This includes all mature coinbase outputs.
 //
 // TODO: change to HeightDiff
-pub const MAX_BLOCK_REORG_HEIGHT: u32 = MIN_TRANSPARENT_COINBASE_MATURITY - 1;
+pub const MAX_BLOCK_REORG_HEIGHT: u32 = 1000; // this is essentially the max chain height since it errors when trying to finalize blocks...
 
 /// The directory name used to distinguish the state database from Zebra's other databases or flat files.
 pub const STATE_DATABASE_KIND: &str = "state";

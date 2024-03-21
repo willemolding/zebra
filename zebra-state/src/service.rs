@@ -939,6 +939,7 @@ impl Service<Request> for StateService {
                     rsp_rx
                         .await
                         .map_err(|_recv_error| {
+                            tracing::error!("queue_and_commit_to_non_finalized_state error with {:?}", _recv_error);
                             BoxError::from(
                                 "block was dropped from the queue of non-finalized blocks",
                             )

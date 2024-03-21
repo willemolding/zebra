@@ -1640,12 +1640,14 @@ impl UpdateWith<ContextuallyVerifiedBlock> for Chain {
 
         // TODO: move this to a Work or block header UpdateWith.revert...()?
         // remove work from partial_cumulative_work
-        let block_work = block
-            .header
-            .difficulty_threshold
-            .to_work()
-            .expect("work has already been validated");
-        self.partial_cumulative_work -= block_work;
+        if self.network != Network::TinyCash {
+            let block_work = block
+                .header
+                .difficulty_threshold
+                .to_work()
+                .expect("work has already been validated");
+            self.partial_cumulative_work -= block_work;
+        }
 
         // for each transaction in block
         for (transaction, transaction_hash) in

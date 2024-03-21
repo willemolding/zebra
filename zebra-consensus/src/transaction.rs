@@ -446,8 +446,9 @@ where
             let value_balance = tx.value_balance(&spent_utxos);
 
             // Calculate the fee only for non-coinbase transactions.
+            // No fees in tinycash
             let mut miner_fee = None;
-            if !tx.is_coinbase() {
+            if network != Network::TinyCash && !tx.is_coinbase() {
                 // TODO: deduplicate this code with remaining_transaction_value()?
                 miner_fee = match value_balance {
                     Ok(vb) => match vb.remaining_transaction_value() {
