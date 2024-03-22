@@ -925,7 +925,14 @@ impl ZcashDeserialize for Transaction {
                     orchard_shielded_data,
                 })
             }
-            (_, _) => Err(SerializationError::Parse("bad tx header")),
+            (v, overwintered) => {
+                println!(
+                    "Invalid transaction version or overwintered flag: version: {}, overwintered: {}",
+                    v,
+                    overwintered
+                );
+                Err(SerializationError::Parse("bad tx header"))
+            }
         }
     }
 }

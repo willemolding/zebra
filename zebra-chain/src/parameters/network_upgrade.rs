@@ -71,12 +71,12 @@ impl fmt::Display for NetworkUpgrade {
 pub(super) const MAINNET_ACTIVATION_HEIGHTS: &[(block::Height, NetworkUpgrade)] = &[
     (block::Height(0), Genesis),
     (block::Height(1), BeforeOverwinter),
-    (block::Height(347_500), Overwinter),
-    (block::Height(419_200), Sapling),
-    (block::Height(653_600), Blossom),
-    (block::Height(903_000), Heartwood),
-    (block::Height(1_046_400), Canopy),
-    (block::Height(1_687_104), Nu5),
+    (block::Height(1), Overwinter),
+    (block::Height(1), Sapling),
+    (block::Height(1), Blossom),
+    (block::Height(1), Heartwood),
+    (block::Height(1), Canopy),
+    (block::Height(1), Nu5),
 ];
 
 /// Fake mainnet network upgrade activation heights, used in tests.
