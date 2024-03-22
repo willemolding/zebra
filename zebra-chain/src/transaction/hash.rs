@@ -209,7 +209,7 @@ impl ZcashDeserialize for Hash {
 /// [ZIP-239]: https://zips.z.cash/zip-0239
 /// [Spec: Transaction Identifiers]: https://zips.z.cash/protocol/protocol.pdf#txnidentifiers
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
-#[cfg_attr(any(test, feature = "proptest-impl"), derive(Arbitrary))]
+#[cfg_attr(any(test, feature = "proptest-impl"), derive(Serialize, Deserialize, Arbitrary))]
 pub struct WtxId {
     /// The non-malleable transaction ID for this transaction's effects.
     pub id: Hash,

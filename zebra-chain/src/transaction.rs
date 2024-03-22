@@ -65,7 +65,7 @@ use crate::{
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     any(test, feature = "proptest-impl", feature = "elasticsearch"),
-    derive(Serialize)
+    derive(Serialize, Deserialize)
 )]
 pub enum Transaction {
     /// A fully transparent transaction (`version = 1`).

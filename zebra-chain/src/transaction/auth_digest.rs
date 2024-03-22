@@ -23,7 +23,7 @@ use proptest_derive::Arbitrary;
 ///
 /// [ZIP-244]: https://zips.z.cash/zip-0244
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
-#[cfg_attr(any(test, feature = "proptest-impl"), derive(Arbitrary))]
+#[cfg_attr(any(test, feature = "proptest-impl"), derive(Serialize, Deserialize, Arbitrary))]
 pub struct AuthDigest(pub [u8; 32]);
 
 impl AuthDigest {

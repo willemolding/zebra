@@ -68,7 +68,7 @@ pub const EXTRA_ZEBRA_COINBASE_DATA: &str = "z\u{1F993}";
 #[derive(Clone, Eq, PartialEq)]
 #[cfg_attr(
     any(test, feature = "proptest-impl", feature = "elasticsearch"),
-    derive(Serialize)
+    derive(Serialize, Deserialize)
 )]
 pub struct CoinbaseData(
     /// Invariant: this vec, together with the coinbase height, must be less than
@@ -116,7 +116,7 @@ impl std::fmt::Debug for CoinbaseData {
 #[cfg_attr(any(test, feature = "proptest-impl"), derive(Arbitrary))]
 #[cfg_attr(
     any(test, feature = "proptest-impl", feature = "elasticsearch"),
-    derive(Serialize)
+    derive(Serialize, Deserialize)
 )]
 pub struct OutPoint {
     /// References the transaction that contains the UTXO being spent.
@@ -154,7 +154,7 @@ impl OutPoint {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     any(test, feature = "proptest-impl", feature = "elasticsearch"),
-    derive(Serialize)
+    derive(Serialize, Deserialize)
 )]
 pub enum Input {
     /// A reference to an output of a previous transaction.

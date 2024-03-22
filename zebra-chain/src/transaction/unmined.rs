@@ -87,7 +87,7 @@ const MEMPOOL_TRANSACTION_LOW_FEE_PENALTY: u64 = 40_000;
 /// [ZIP-244]: https://zips.z.cash/zip-0244
 /// [Spec: Transaction Identifiers]: https://zips.z.cash/protocol/protocol.pdf#txnidentifiers
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
-#[cfg_attr(any(test, feature = "proptest-impl"), derive(Arbitrary))]
+#[cfg_attr(any(test, feature = "proptest-impl"), derive(serde::Serialize, serde::Deserialize, Arbitrary))]
 pub enum UnminedTxId {
     /// A legacy unmined transaction identifier.
     ///
@@ -228,6 +228,10 @@ impl UnminedTxId {
 /// This transaction has been structurally verified.
 /// (But it might still need semantic or contextual verification.)
 #[derive(Clone, Eq, PartialEq)]
+#[cfg_attr(
+    feature = "proptest-impl",
+    derive(serde::Serialize, serde::Deserialize),
+)]
 pub struct UnminedTx {
     /// The unmined transaction itself.
     pub transaction: Arc<Transaction>,

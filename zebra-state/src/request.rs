@@ -33,7 +33,7 @@ use crate::{
 ///
 /// This enum implements `From` for [`block::Hash`] and [`block::Height`],
 /// so it can be created using `hash.into()` or `height.into()`.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
 pub enum HashOrHeight {
     /// A block identified by hash.
     Hash(block::Hash),
@@ -750,6 +750,10 @@ impl Request {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "proptest-impl",
+    derive(serde::Serialize, serde::Deserialize),
+)]
 /// A read-only query about the chain state, via the
 /// [`ReadStateService`](crate::service::ReadStateService).
 pub enum ReadRequest {
