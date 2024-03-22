@@ -105,12 +105,12 @@ const FAKE_MAINNET_ACTIVATION_HEIGHTS: &[(block::Height, NetworkUpgrade)] = &[
 pub(super) const TESTNET_ACTIVATION_HEIGHTS: &[(block::Height, NetworkUpgrade)] = &[
     (block::Height(0), Genesis),
     (block::Height(1), BeforeOverwinter),
-    (block::Height(207_500), Overwinter),
-    (block::Height(280_000), Sapling),
-    (block::Height(584_000), Blossom),
-    (block::Height(903_800), Heartwood),
-    (block::Height(1_028_500), Canopy),
-    (block::Height(1_842_420), Nu5),
+    (block::Height(1), Overwinter),
+    (block::Height(1), Sapling),
+    (block::Height(1), Blossom),
+    (block::Height(1), Heartwood),
+    (block::Height(1), Canopy),
+    (block::Height(1), Nu5),
 ];
 
 /// Fake testnet network upgrade activation heights, used in tests.
@@ -124,21 +124,6 @@ const FAKE_TESTNET_ACTIVATION_HEIGHTS: &[(block::Height, NetworkUpgrade)] = &[
     (block::Height(25), Heartwood),
     (block::Height(30), Canopy),
     (block::Height(35), Nu5),
-];
-
-/// TinyCash network upgrade activation heights.
-///
-/// Tiny cash gets all the network upgrades right from the start
-#[allow(unused)]
-pub(super) const TINYCASH_ACTIVATION_HEIGHTS: &[(block::Height, NetworkUpgrade)] = &[
-    (block::Height(0), Genesis),
-    (block::Height(1), BeforeOverwinter),
-    (block::Height(1), Overwinter),
-    (block::Height(1), Sapling),
-    (block::Height(1), Blossom),
-    (block::Height(1), Heartwood),
-    (block::Height(1), Canopy),
-    (block::Height(1), Nu5),
 ];
 
 /// The Consensus Branch Id, used to bind transactions and blocks to a
@@ -257,10 +242,10 @@ impl Network {
     /// and it's a test build, this returns a list of fake activation heights
     /// used by some tests.
     pub fn activation_list(&self) -> BTreeMap<block::Height, NetworkUpgrade> {
-        let (mainnet_heights, testnet_heights, tinycash_heights) = {
+        let (mainnet_heights, testnet_heights) = {
             #[cfg(not(feature = "zebra-test"))]
             {
-                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS, TINYCASH_ACTIVATION_HEIGHTS)
+                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS)
             }
 
             // To prevent accidentally setting this somehow, only check the env var
@@ -279,16 +264,14 @@ impl Network {
                 (
                     FAKE_MAINNET_ACTIVATION_HEIGHTS,
                     FAKE_TESTNET_ACTIVATION_HEIGHTS,
-                    TINYCASH_ACTIVATION_HEIGHTS,
                 )
             } else {
-                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS, TINYCASH_ACTIVATION_HEIGHTS)
+                (MAINNET_ACTIVATION_HEIGHTS, TESTNET_ACTIVATION_HEIGHTS)
             }
         };
         match self {
             Mainnet => mainnet_heights,
             Testnet => testnet_heights,
-            TinyCash => tinycash_heights,
         }
         .iter()
         .cloned()
@@ -323,15 +306,7 @@ impl NetworkUpgrade {
     /// Returns None if this network upgrade is a future upgrade, and its
     /// activation height has not been set yet.
     pub fn activation_height(&self, network: Network) -> Option<block::Height> {
-        if network == Network::TinyCash {
-            return Some(block::Height(1)); // everything is activated from the start
-        }
-        network
-            .activation_list()
-            .iter()
-            .filter(|(_, nu)| nu == &self)
-            .map(|(height, _)| *height)
-            .next()
+        return Some(block::Height(1)); // everything is activated from the start
     }
 
     /// Returns `true` if `height` is the activation height of any network upgrade
@@ -412,13 +387,9 @@ impl NetworkUpgrade {
         height: block::Height,
     ) -> Option<Duration> {
         match (network, height) {
-            (Network::Testnet, height) if height < TESTNET_MINIMUM_DIFFICULTY_START_HEIGHT => None,
+            // (Network::Testnet, height) if height < TESTNET_MINIMUM_DIFFICULTY_START_HEIGHT => None,
             (Network::Mainnet, _) => None,
-            (Network::TinyCash, _) => None,
-            (Network::Testnet, _) => {
-                let network_upgrade = NetworkUpgrade::current(network, height);
-                Some(network_upgrade.target_spacing() * TESTNET_MINIMUM_DIFFICULTY_GAP_MULTIPLIER)
-            }
+            (Network::Testnet, _) => None
         }
     }
 

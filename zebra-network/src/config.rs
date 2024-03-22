@@ -226,7 +226,6 @@ impl Config {
         match self.network {
             Network::Mainnet => &self.initial_mainnet_peers,
             Network::Testnet => &self.initial_testnet_peers,
-            Network::TinyCash => &self.initial_mainnet_peers,
         }
     }
 

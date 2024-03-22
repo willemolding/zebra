@@ -700,8 +700,6 @@ impl ParameterDifficulty for Network {
             Network::Mainnet => (U256::one() << 243) - 1,
             /* 2^251 - 1 */
             Network::Testnet => (U256::one() << 251) - 1,
-            /* Irrelevant */
-            Network::TinyCash => (U256::one() << 243) - 1,
         };
 
         // `zcashd` converts the PoWLimit into a compact representation before

@@ -1473,16 +1473,6 @@ impl Chain {
             "block heights must be unique within a single chain"
         );
 
-        if self.network != Network::TinyCash {
-            // add work to partial cumulative work
-            let block_work = block
-                .header
-                .difficulty_threshold
-                .to_work()
-                .expect("work has already been validated");
-            self.partial_cumulative_work += block_work;
-        }
-
         // for each transaction in block
         for (transaction_index, (transaction, transaction_hash)) in block
             .transactions
@@ -1637,17 +1627,6 @@ impl UpdateWith<ContextuallyVerifiedBlock> for Chain {
             self.height_by_hash.remove(&hash).is_some(),
             "hash must be present if block was added to chain"
         );
-
-        // TODO: move this to a Work or block header UpdateWith.revert...()?
-        // remove work from partial_cumulative_work
-        if self.network != Network::TinyCash {
-            let block_work = block
-                .header
-                .difficulty_threshold
-                .to_work()
-                .expect("work has already been validated");
-            self.partial_cumulative_work -= block_work;
-        }
 
         // for each transaction in block
         for (transaction, transaction_hash) in

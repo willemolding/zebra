@@ -61,9 +61,6 @@ pub enum Network {
 
     /// The oldest public test network.
     Testnet,
-
-    /// Special network for rollups
-    TinyCash,
 }
 
 use zcash_primitives::consensus::{Network as ZcashPrimitivesNetwork, Parameters as _};
@@ -90,8 +87,7 @@ impl Network {
     pub fn is_max_block_time_enforced(self, height: block::Height) -> bool {
         match self {
             Network::Mainnet => true,
-            Network::Testnet => height >= super::TESTNET_MAX_TIME_START_HEIGHT,
-            Network::TinyCash => false,
+            Network::Testnet => false,
         }
     }
 }
@@ -101,7 +97,6 @@ impl From<Network> for &'static str {
         match network {
             Network::Mainnet => "Mainnet",
             Network::Testnet => "Testnet",
-            Network::TinyCash => "TinyCash",
         }
     }
 }
@@ -130,7 +125,6 @@ impl Network {
         match self {
             Network::Mainnet => 8233,
             Network::Testnet => 18233,
-            Network::TinyCash => 8233,
         }
     }
 
@@ -160,7 +154,6 @@ impl Network {
         match self {
             Network::Mainnet => "main".to_string(),
             Network::Testnet => "test".to_string(),
-            Network::TinyCash => "tinycash".to_string(),
         }
     }
 

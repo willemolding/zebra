@@ -80,45 +80,7 @@ where
         .expect("valid blocks have a coinbase height");
     check::height_one_more_than_parent_height(parent_height, semantically_verified.height)?;
 
-
-    if network == Network::TinyCash {
-        // TinyCash has no difficulty adjustment, so we can skip the rest of the checks
-        return Ok(());
-    }
-
-    if relevant_chain.len() < POW_ADJUSTMENT_BLOCK_SPAN {
-        // skip this check during tests if we don't have enough blocks in the chain
-        // process_queued also checks the chain length, so we can skip this assertion during testing
-        // (tests that want to check this code should use the correct number of blocks)
-        //
-        // TODO: accept a NotReadyToBeCommitted error in those tests instead
-        #[cfg(test)]
-        return Ok(());
-
-        // In production, blocks without enough context are invalid.
-        //
-        // The BlockVerifierRouter makes sure that the first 1 million blocks (or more) are
-        // checkpoint verified. The state queues and block write task make sure that blocks are
-        // committed in strict height order. But this function is only called on semantically
-        // verified blocks, so there will be at least 1 million blocks in the state when it is
-        // called. So this error should never happen.
-        #[cfg(not(test))]
-        return Err(ValidateContextError::NotReadyToBeCommitted);
-    }
-
-    let relevant_data = relevant_chain.iter().map(|block| {
-        (
-            block.borrow().header.difficulty_threshold,
-            block.borrow().header.time,
-        )
-    });
-    let difficulty_adjustment =
-        AdjustedDifficulty::new_from_block(&semantically_verified.block, network, relevant_data);
-    check::difficulty_threshold_and_time_are_valid(
-        semantically_verified.block.header.difficulty_threshold,
-        difficulty_adjustment,
-    )?;
-
+    // TinyCash has no difficulty adjustment, so we can skip the rest of the checks
     Ok(())
 }
 
@@ -130,84 +92,8 @@ pub(crate) fn block_commitment_is_valid_for_chain_history(
     network: Network,
     history_tree: &HistoryTree,
 ) -> Result<(), ValidateContextError> {
-
-    if network == Network::TinyCash {
-        // TinyCash has no chain history, so we can skip the rest of the checks
-        return Ok(());
-    }
-
-    match block.commitment(network)? {
-        block::Commitment::PreSaplingReserved(_)
-        | block::Commitment::FinalSaplingRoot(_)
-        | block::Commitment::ChainHistoryActivationReserved => {
-            // # Consensus
-            //
-            // > [Sapling and Blossom only, pre-Heartwood] hashLightClientRoot MUST
-            // > be LEBS2OSP_{256}(rt^{Sapling}) where rt^{Sapling} is the root of
-            // > the Sapling note commitment tree for the final Sapling treestate of
-            // > this block .
-            //
-            // https://zips.z.cash/protocol/protocol.pdf#blockheader
-            //
-            // We don't need to validate this rule since we checkpoint on Canopy.
-            //
-            // We also don't need to do anything in the other cases.
-            Ok(())
-        }
-        block::Commitment::ChainHistoryRoot(actual_history_tree_root) => {
-            // # Consensus
-            //
-            // > [Heartwood and Canopy only, pre-NU5] hashLightClientRoot MUST be set to the
-            // > hashChainHistoryRoot for this block , as specified in [ZIP-221].
-            //
-            // https://zips.z.cash/protocol/protocol.pdf#blockheader
-            //
-            // The network is checked by [`Block::commitment`] above; it will only
-            // return the chain history root if it's Heartwood or Canopy.
-            let history_tree_root = history_tree
-                .hash()
-                .expect("the history tree of the previous block must exist since the current block has a ChainHistoryRoot");
-            if actual_history_tree_root == history_tree_root {
-                Ok(())
-            } else {
-                Err(ValidateContextError::InvalidBlockCommitment(
-                    CommitmentError::InvalidChainHistoryRoot {
-                        actual: actual_history_tree_root.into(),
-                        expected: history_tree_root.into(),
-                    },
-                ))
-            }
-        }
-        block::Commitment::ChainHistoryBlockTxAuthCommitment(actual_hash_block_commitments) => {
-            // # Consensus
-            //
-            // > [NU5 onward] hashBlockCommitments MUST be set to the value of
-            // > hashBlockCommitments for this block, as specified in [ZIP-244].
-            //
-            // The network is checked by [`Block::commitment`] above; it will only
-            // return the block commitments if it's NU5 onward.
-            let history_tree_root = history_tree
-                .hash()
-                .expect("the history tree of the previous block must exist since the current block has a ChainHistoryBlockTxAuthCommitment");
-            let auth_data_root = block.auth_data_root();
-
-            let hash_block_commitments = ChainHistoryBlockTxAuthCommitmentHash::from_commitments(
-                &history_tree_root,
-                &auth_data_root,
-            );
-
-            if actual_hash_block_commitments == hash_block_commitments {
-                Ok(())
-            } else {
-                Err(ValidateContextError::InvalidBlockCommitment(
-                    CommitmentError::InvalidChainHistoryBlockTxAuthCommitment {
-                        actual: actual_hash_block_commitments.into(),
-                        expected: hash_block_commitments.into(),
-                    },
-                ))
-            }
-        }
-    }
+    // tinycash has no history so this can be skipped
+    Ok(())
 }
 
 /// Returns `ValidateContextError::OrphanedBlock` if the height of the given

@@ -32,7 +32,6 @@ impl ParameterMagic for Network {
         match self {
             Network::Mainnet => magics::MAINNET,
             Network::Testnet => magics::TESTNET,
-            Network::TinyCash => magics::MAINNET,
         }
     }
 }
@@ -115,7 +114,6 @@ impl Version {
             (Mainnet, Canopy) => 170_013,
             (Testnet, Nu5) => 170_050,
             (Mainnet, Nu5) => 170_100,
-            (TinyCash, _) => 170_002,
         })
     }
 }

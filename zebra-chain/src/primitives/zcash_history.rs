@@ -254,18 +254,7 @@ impl Version for zcash_history::V1 {
         let target = block.header.difficulty_threshold.0;
         let sapling_root: [u8; 32] = sapling_root.into();
         
-        let work = match network {
-            Network::TinyCash => primitive_types::U256::zero(),
-            _ => {
-                let work = block
-                .header
-                .difficulty_threshold
-                .to_work()
-                .expect("work must be valid during contextual verification");
-                // There is no direct `std::primitive::u128` to `bigint::U256` conversion
-                primitive_types::U256::from_big_endian(&work.as_u128().to_be_bytes())
-            }
-        };
+        let work = primitive_types::U256::zero();
 
         let sapling_tx_count = block.sapling_transactions_count();
 

@@ -210,13 +210,7 @@ where
             // Quick field validity and structure checks
 
             // don't care about block times or subsidies for tinycash
-            if !request.is_tinycash() {
-                let now = Utc::now();
-                check::time_is_valid_at(&block.header, now, &height, &hash)
-                    .map_err(VerifyBlockError::Time)?;
-                check::subsidy_is_valid(&block, network)?;
-
-            }
+            
             let coinbase_tx = check::coinbase_is_first(&block)?;
 
             // Now do the slower checks

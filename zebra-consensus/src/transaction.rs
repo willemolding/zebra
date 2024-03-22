@@ -448,16 +448,6 @@ where
             // Calculate the fee only for non-coinbase transactions.
             // No fees in tinycash
             let mut miner_fee = None;
-            if network != Network::TinyCash && !tx.is_coinbase() {
-                // TODO: deduplicate this code with remaining_transaction_value()?
-                miner_fee = match value_balance {
-                    Ok(vb) => match vb.remaining_transaction_value() {
-                        Ok(tx_rtv) => Some(tx_rtv),
-                        Err(_) => return Err(TransactionError::IncorrectFee),
-                    },
-                    Err(_) => return Err(TransactionError::IncorrectFee),
-                };
-            }
 
             let legacy_sigop_count = cached_ffi_transaction.legacy_sigop_count()?;
 
