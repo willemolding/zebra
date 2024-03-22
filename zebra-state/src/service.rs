@@ -1005,75 +1005,92 @@ impl Service<Request> for StateService {
             // Uses pending_utxos and non_finalized_state_queued_blocks in the StateService.
             // If the UTXO isn't in the queued blocks, runs concurrently using the ReadStateService.
             Request::AwaitUtxo(outpoint) => {
-                // Prepare the AwaitUtxo future from PendingUxtos.
-                let response_fut = self.pending_utxos.queue(outpoint);
-                // Only instrument `response_fut`, the ReadStateService already
-                // instruments its requests with the same span.
-
-                let response_fut = response_fut.instrument(span).boxed();
-
-                // Check the non-finalized block queue outside the returned future,
-                // so we can access mutable state fields.
-                if let Some(utxo) = self.non_finalized_state_queued_blocks.utxo(&outpoint) {
-                    self.pending_utxos.respond(&outpoint, utxo);
-
-                    // We're finished, the returned future gets the UTXO from the respond() channel.
-                    timer.finish(module_path!(), line!(), "AwaitUtxo/queued-non-finalized");
-
-                    return response_fut;
-                }
-
-                // Check the sent non-finalized blocks
-                if let Some(utxo) = self.non_finalized_block_write_sent_hashes.utxo(&outpoint) {
-                    self.pending_utxos.respond(&outpoint, utxo);
-
-                    // We're finished, the returned future gets the UTXO from the respond() channel.
-                    timer.finish(module_path!(), line!(), "AwaitUtxo/sent-non-finalized");
-
-                    return response_fut;
-                }
-
-                // We ignore any UTXOs in FinalizedState.finalized_state_queued_blocks,
-                // because it is only used during checkpoint verification.
-                //
-                // This creates a rare race condition, but it doesn't seem to happen much in practice.
-                // See #5126 for details.
-
-                // Manually send a request to the ReadStateService,
-                // to get UTXOs from any non-finalized chain or the finalized chain.
+                // match the read service to fail immedietly on an unknown utxo
                 let read_service = self.read_service.clone();
-
-                // Run the request in an async block, so we can await the response.
                 async move {
                     let req = ReadRequest::AnyChainUtxo(outpoint);
 
                     let rsp = read_service.oneshot(req).await?;
 
-                    // Optional TODO:
-                    //  - make pending_utxos.respond() async using a channel,
-                    //    so we can respond to all waiting requests here
-                    //
-                    // This change is not required for correctness, because:
-                    // - any waiting requests should have returned when the block was sent to the state
-                    // - otherwise, the request returns immediately if:
-                    //   - the block is in the non-finalized queue, or
-                    //   - the block is in any non-finalized chain or the finalized state
-                    //
-                    // And if the block is in the finalized queue,
-                    // that's rare enough that a retry is ok.
                     if let ReadResponse::AnyChainUtxo(Some(utxo)) = rsp {
-                        // We got a UTXO, so we replace the response future with the result own.
-                        timer.finish(module_path!(), line!(), "AwaitUtxo/any-chain");
-
-                        return Ok(Response::Utxo(utxo));
+                        Ok(Response::Utxo(utxo))
+                    } else {
+                        Err("UTXO not found".into())
                     }
+                }.boxed()
 
-                    // We're finished, but the returned future is waiting on the respond() channel.
-                    timer.finish(module_path!(), line!(), "AwaitUtxo/waiting");
 
-                    response_fut.await
-                }
-                .boxed()
+                ////
+
+                // // Prepare the AwaitUtxo future from PendingUxtos.
+                // let response_fut = self.pending_utxos.queue(outpoint);
+                // // Only instrument `response_fut`, the ReadStateService already
+                // // instruments its requests with the same span.
+
+                // let response_fut = response_fut.instrument(span).boxed();
+
+                // // Check the non-finalized block queue outside the returned future,
+                // // so we can access mutable state fields.
+                // if let Some(utxo) = self.non_finalized_state_queued_blocks.utxo(&outpoint) {
+                //     self.pending_utxos.respond(&outpoint, utxo);
+
+                //     // We're finished, the returned future gets the UTXO from the respond() channel.
+                //     timer.finish(module_path!(), line!(), "AwaitUtxo/queued-non-finalized");
+
+                //     return response_fut;
+                // }
+
+                // // Check the sent non-finalized blocks
+                // if let Some(utxo) = self.non_finalized_block_write_sent_hashes.utxo(&outpoint) {
+                //     self.pending_utxos.respond(&outpoint, utxo);
+
+                //     // We're finished, the returned future gets the UTXO from the respond() channel.
+                //     timer.finish(module_path!(), line!(), "AwaitUtxo/sent-non-finalized");
+
+                //     return response_fut;
+                // }
+
+                // // We ignore any UTXOs in FinalizedState.finalized_state_queued_blocks,
+                // // because it is only used during checkpoint verification.
+                // //
+                // // This creates a rare race condition, but it doesn't seem to happen much in practice.
+                // // See #5126 for details.
+
+                // // Manually send a request to the ReadStateService,
+                // // to get UTXOs from any non-finalized chain or the finalized chain.
+                // let read_service = self.read_service.clone();
+
+                // // Run the request in an async block, so we can await the response.
+                // async move {
+                //     let req = ReadRequest::AnyChainUtxo(outpoint);
+
+                //     let rsp = read_service.oneshot(req).await?;
+
+                //     // Optional TODO:
+                //     //  - make pending_utxos.respond() async using a channel,
+                //     //    so we can respond to all waiting requests here
+                //     //
+                //     // This change is not required for correctness, because:
+                //     // - any waiting requests should have returned when the block was sent to the state
+                //     // - otherwise, the request returns immediately if:
+                //     //   - the block is in the non-finalized queue, or
+                //     //   - the block is in any non-finalized chain or the finalized state
+                //     //
+                //     // And if the block is in the finalized queue,
+                //     // that's rare enough that a retry is ok.
+                //     if let ReadResponse::AnyChainUtxo(Some(utxo)) = rsp {
+                //         // We got a UTXO, so we replace the response future with the result own.
+                //         timer.finish(module_path!(), line!(), "AwaitUtxo/any-chain");
+
+                //         return Ok(Response::Utxo(utxo));
+                //     }
+
+                //     // We're finished, but the returned future is waiting on the respond() channel.
+                //     timer.finish(module_path!(), line!(), "AwaitUtxo/waiting");
+
+                //     response_fut.await
+                // }
+                // .boxed()
             }
 
             // Used by sync, inbound, and block verifier to check if a block is already in the state
