@@ -12,7 +12,7 @@ use crate::{
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(
     any(test, feature = "proptest-impl"),
-    derive(proptest_derive::Arbitrary, serde::Serialize)
+    derive(proptest_derive::Arbitrary, serde::Serialize, serde::Deserialize)
 )]
 pub struct Utxo {
     /// The output itself.
@@ -37,7 +37,7 @@ pub struct Utxo {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     any(test, feature = "proptest-impl"),
-    derive(proptest_derive::Arbitrary)
+    derive(Serialize, Deserialize, proptest_derive::Arbitrary)
 )]
 //
 // TODO: after modifying UTXO to contain an OutputLocation, replace this type with UTXO

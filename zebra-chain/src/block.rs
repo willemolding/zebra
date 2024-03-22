@@ -47,7 +47,7 @@ pub use arbitrary::LedgerState;
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     any(test, feature = "proptest-impl", feature = "elasticsearch"),
-    derive(Serialize)
+    derive(Serialize, Deserialize)
 )]
 pub struct Block {
     /// The block header, containing block metadata.

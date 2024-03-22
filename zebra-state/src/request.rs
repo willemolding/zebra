@@ -138,6 +138,10 @@ impl std::str::FromStr for HashOrHeight {
 /// the *service caller*'s task, not inside the service call itself. This allows
 /// moving work out of the single-threaded state service.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "proptest-impl",
+    derive(serde::Serialize, serde::Deserialize),
+)]
 pub struct SemanticallyVerifiedBlock {
     /// The block to commit to the state.
     pub block: Arc<Block>,
