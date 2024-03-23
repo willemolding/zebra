@@ -81,6 +81,10 @@ pub enum Response {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "proptest-impl",
+    derive(serde::Serialize, serde::Deserialize),
+)]
 /// An enum of block stores in the state where a block hash could be found.
 pub enum KnownBlock {
     /// Block is in the best chain.
@@ -95,6 +99,10 @@ pub enum KnownBlock {
 
 /// Information about a transaction in the best chain
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "proptest-impl",
+    derive(serde::Serialize, serde::Deserialize),
+)]
 pub struct MinedTx {
     /// The transaction.
     pub tx: Arc<Transaction>,
@@ -119,6 +127,10 @@ impl MinedTx {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "proptest-impl",
+    derive(serde::Serialize, serde::Deserialize),
+)]
 /// A response to a read-only
 /// [`ReadStateService`](crate::service::ReadStateService)'s [`ReadRequest`].
 pub enum ReadResponse {

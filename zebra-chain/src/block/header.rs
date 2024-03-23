@@ -136,6 +136,10 @@ impl Header {
 /// The transaction count field is always zero, so we don't store it in the struct.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(any(test, feature = "proptest-impl"), derive(Arbitrary))]
+#[cfg_attr(
+    feature = "proptest-impl",
+    derive(serde::Serialize, serde::Deserialize),
+)]
 pub struct CountedHeader {
     /// The header for a block
     pub header: Arc<Header>,

@@ -184,6 +184,7 @@ where
                 Request::Commit(_) => {
                     check::difficulty_threshold_is_valid(&block.header, network, &height, &hash)?;
                 }
+                #[cfg(feature = "getblocktemplate-rpcs")]
                 Request::CheckProposal(_) => {
                     // Do the difficulty checks first, to raise the threshold for
                     // attacks that use any other fields.
