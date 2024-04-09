@@ -10,7 +10,7 @@ use crate::serialization::{SerializationError, ZcashDeserialize, ZcashSerialize}
 ///
 /// Corresponds to the Orchard 'encCiphertext's
 #[derive(Deserialize, Serialize)]
-pub struct EncryptedNote(#[serde(with = "BigArray")] pub(crate) [u8; 580]);
+pub struct EncryptedNote(#[serde(with = "BigArray")] pub [u8; 580]);
 
 // These impls all only exist because of array length restrictions.
 // TODO: use const generics https://github.com/ZcashFoundation/zebra/issues/2042

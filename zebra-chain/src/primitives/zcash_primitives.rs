@@ -171,7 +171,7 @@ impl TryFrom<&Transaction> for zp_tx::Transaction {
     }
 }
 
-pub(crate) fn convert_tx_to_librustzcash(
+pub fn convert_tx_to_librustzcash(
     trans: &Transaction,
     network_upgrade: NetworkUpgrade,
 ) -> Result<zp_tx::Transaction, io::Error> {
