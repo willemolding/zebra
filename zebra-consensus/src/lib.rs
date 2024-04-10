@@ -38,7 +38,7 @@ mod block;
 mod checkpoint;
 mod parameters;
 pub mod primitives;
-mod script;
+pub mod script;
 
 pub mod config;
 pub mod error;

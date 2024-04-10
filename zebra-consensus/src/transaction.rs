@@ -771,7 +771,7 @@ where
     /// `script_verifier` and `cached_ffi_transaction`.
     ///
     /// Returns script verification responses via the `utxo_sender`.
-    fn verify_transparent_inputs_and_outputs(
+    pub fn verify_transparent_inputs_and_outputs(
         request: &Request,
         network: Network,
         script_verifier: script::Verifier,
@@ -997,7 +997,7 @@ where
     }
 
     /// Verifies a transaction's Orchard shielded data.
-    fn verify_orchard_shielded_data(
+    pub fn verify_orchard_shielded_data(
         orchard_shielded_data: &Option<orchard::ShieldedData>,
         shielded_sighash: &SigHash,
     ) -> Result<AsyncChecks, TransactionError> {
@@ -1100,7 +1100,7 @@ where
 /// A set of unordered asynchronous checks that should succeed.
 ///
 /// A wrapper around [`FuturesUnordered`] with some auxiliary methods.
-struct AsyncChecks(FuturesUnordered<Pin<Box<dyn Future<Output = Result<(), BoxError>> + Send>>>);
+pub struct AsyncChecks(FuturesUnordered<Pin<Box<dyn Future<Output = Result<(), BoxError>> + Send>>>);
 
 impl AsyncChecks {
     /// Create an empty set of unordered asynchronous checks.
@@ -1125,7 +1125,7 @@ impl AsyncChecks {
     ///
     /// If any of the checks fail, this method immediately returns the error and cancels all other
     /// checks by dropping them.
-    async fn check(mut self) -> Result<(), BoxError> {
+    pub async fn check(mut self) -> Result<(), BoxError> {
         // Wait for all asynchronous checks to complete
         // successfully, or fail verification if they error.
         while let Some(check) = self.0.next().await {
